@@ -11,6 +11,7 @@ import cs3500.freecell.model.Card;
 import cs3500.freecell.model.FreecellModel;
 import cs3500.freecell.model.SimpleFreecellModel;
 import cs3500.freecell.model.Suits;
+import cs3500.freecell.model.multimove.MultiMoveSimpleFreecellModel;
 
 import static org.junit.Assert.assertEquals;
 
@@ -48,6 +49,26 @@ public class FreecellControllerTest {
   private void win() {
     List<String> seq = new ArrayList<>();
     for (int i = 1; i < 5; i++) {
+      for (int j = 13; j > 0; j--) {
+        seq.add("C" + i + " " + j + " " + "F" + i);
+      }
+    }
+    winSequenece = String.join(" ", seq);
+  }
+
+  /**
+   * Makes a input sequence that leads to winning (based on orderedDeck order).
+   */
+  private void halfwin() {
+    List<String> seq = new ArrayList<>();
+    for (int i = 1; i < 3; i++) {
+      for (int j = 13; j > 0; j--) {
+        seq.add("C" + i + " " + j + " " + "F" + i);
+      }
+    }
+    seq.add("wqehihfie");
+    seq.add("weiiefwhfiwe");
+    for (int i = 3; i < 5; i++) {
       for (int j = 13; j > 0; j--) {
         seq.add("C" + i + " " + j + " " + "F" + i);
       }
@@ -694,5 +715,111 @@ public class FreecellControllerTest {
     SimpleFreecellController controller = new SimpleFreecellController(model, rd, text);
     controller.playGame(orderedDeck, 4, 1, false);
     assertEquals(false, text.toString().contains("Invalid pile type !\n"));
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void voidInvalidBuild() {
+    Appendable text = new StringBuilder();
+    Readable rd = new StringReader("C1 8 F1");
+    FreecellModel<Card> model = new MultiMoveSimpleFreecellModel();
+    SimpleFreecellController controller = new SimpleFreecellController(model, rd, text);
+    controller.playGame(model.getDeck(), 4, 4, false);
+  }
+
+  @Test
+  public void NotEnoughEmptySpots() {
+    initOrderedDeck();
+    String expected = "F1: A♦\n" + "F2: A♠, 2♠\n" + "F3: A♥, 2♥, 3♥\n" + "F4:\n" + "O1:\n" +
+            "C1: K♥, Q♥, J♥, 10♥, 9♥, 8♥, 7♥, 6♥, 5♥, 4♥, 3♠, 2♦, A♣\n" +
+            "C2: K♠, Q♠, J♠, 10♠, 9♠, 8♠, 7♠, 6♠, 5♠, 4♠\n" +
+            "C3: K♣, Q♣, J♣, 10♣, 9♣, 8♣, 7♣, 6♣, 5♣, 4♣, 3♣, 2♣\n" +
+            "C4: K♦, Q♦, J♦, 10♦, 9♦, 8♦, 7♦, 6♦, 5♦, 4♦, 3♦\n" + "Invalid move !\n" +
+            "F1: A♦\n" + "F2: A♠, 2♠\n" + "F3: A♥, 2♥, 3♥\n" + "F4:\n" + "O1:\n" +
+            "C1: K♥, Q♥, J♥, 10♥, 9♥, 8♥, 7♥, 6♥, 5♥, 4♥, 3♠, 2♦, A♣\n" +
+            "C2: K♠, Q♠, J♠, 10♠, 9♠, 8♠, 7♠, 6♠, 5♠, 4♠\n" +
+            "C3: K♣, Q♣, J♣, 10♣, 9♣, 8♣, 7♣, 6♣, 5♣, 4♣, 3♣, 2♣\n" +
+            "C4: K♦, Q♦, J♦, 10♦, 9♦, 8♦, 7♦, 6♦, 5♦, 4♦, 3♦\n" +
+            "Game quit prematurely.";
+    String set_up = "C4 13 F1 C2 13 F2 C2 12 F2 C1 13 F3 C1 12 F3 C1 11 F3 ";
+    String making_build = "C2 11 C1 C4 12 C1 C3 13 C1 ";
+    Appendable text = new StringBuilder();
+    Readable rd = new StringReader(set_up + making_build + "C1 10 F1 Q");
+    FreecellModel<Card> model = new MultiMoveSimpleFreecellModel();
+    SimpleFreecellController controller = new SimpleFreecellController(model, rd, text);
+    controller.playGame(orderedDeck, 4, 1, false);
+    assertEquals(expected, text.toString().substring(2176));
+  }
+
+  @Test
+  public void MovingBuild() {
+    initOrderedDeck();
+    String expected = "F1: A♦\n" + "F2: A♠, 2♠\n" + "F3: A♥, 2♥, 3♥\n" + "F4:\n" +
+            "O1: 4♠\n" + "O2:\n" + "O3:\n" + "O4:\n" +
+            "C1: K♥, Q♥, J♥, 10♥, 9♥, 8♥, 7♥, 6♥, 5♥\n" +
+            "C2: K♠, Q♠, J♠, 10♠, 9♠, 8♠, 7♠, 6♠, 5♠, 4♥, 3♠, 2♦, A♣\n" +
+            "C3: K♣, Q♣, J♣, 10♣, 9♣, 8♣, 7♣, 6♣, 5♣, 4♣, 3♣, 2♣\n" +
+            "C4: K♦, Q♦, J♦, 10♦, 9♦, 8♦, 7♦, 6♦, 5♦, 4♦, 3♦\n" +
+            "Game quit prematurely.";
+    String set_up = "C4 13 F1 C2 13 F2 C2 12 F2 C1 13 F3 C1 12 F3 C1 11 F3 ";
+    String making_build = "C2 11 C1 C4 12 C1 C3 13 C1 C2 10 O1 ";
+    Appendable text = new StringBuilder();
+    Readable rd = new StringReader(set_up + making_build + "C1 10 C2 Q");
+    FreecellModel<Card> model = new MultiMoveSimpleFreecellModel();
+    SimpleFreecellController controller = new SimpleFreecellController(model, rd, text);
+    controller.playGame(orderedDeck, 4, 4, false);
+    assertEquals(expected, text.toString().substring(2789));
+  }
+
+  @Test
+  public void MovingBuildInvalidDestinationOpen() {
+    initOrderedDeck();
+    String expected = "Invalid move !\n" + "F1: A♦\n" + "F2: A♠, 2♠\n" + "F3: A♥, 2♥, 3♥\n" +
+            "F4:\n" + "O1: 4♠\n" + "O2:\n" + "O3:\n" + "O4:\n" +
+            "C1: K♥, Q♥, J♥, 10♥, 9♥, 8♥, 7♥, 6♥, 5♥, 4♥, 3♠, 2♦, A♣\n" +
+            "C2: K♠, Q♠, J♠, 10♠, 9♠, 8♠, 7♠, 6♠, 5♠\n" +
+            "C3: K♣, Q♣, J♣, 10♣, 9♣, 8♣, 7♣, 6♣, 5♣, 4♣, 3♣, 2♣\n" +
+            "C4: K♦, Q♦, J♦, 10♦, 9♦, 8♦, 7♦, 6♦, 5♦, 4♦, 3♦\n" +
+            "Game quit prematurely.";
+    String set_up = "C4 13 F1 C2 13 F2 C2 12 F2 C1 13 F3 C1 12 F3 C1 11 F3 ";
+    String making_build = "C2 11 C1 C4 12 C1 C3 13 C1 C2 10 O1 ";
+    Appendable text = new StringBuilder();
+    Readable rd = new StringReader(set_up + making_build + "C1 10 O2 Q");
+    FreecellModel<Card> model = new MultiMoveSimpleFreecellModel();
+    SimpleFreecellController controller = new SimpleFreecellController(model, rd, text);
+    controller.playGame(orderedDeck, 4, 4, false);
+    assertEquals(expected, text.toString().substring(2789));
+  }
+
+  @Test
+  public void MovingBuildInvalidDestinationFoundation() {
+    initOrderedDeck();
+    String expected = "Invalid move !\n" + "F1: A♦\n" + "F2: A♠, 2♠\n" + "F3: A♥, 2♥, 3♥\n" +
+            "F4:\n" + "O1: 4♠\n" + "O2:\n" + "O3:\n" + "O4:\n" +
+            "C1: K♥, Q♥, J♥, 10♥, 9♥, 8♥, 7♥, 6♥, 5♥, 4♥, 3♠, 2♦, A♣\n" +
+            "C2: K♠, Q♠, J♠, 10♠, 9♠, 8♠, 7♠, 6♠, 5♠\n" +
+            "C3: K♣, Q♣, J♣, 10♣, 9♣, 8♣, 7♣, 6♣, 5♣, 4♣, 3♣, 2♣\n" +
+            "C4: K♦, Q♦, J♦, 10♦, 9♦, 8♦, 7♦, 6♦, 5♦, 4♦, 3♦\n" +
+            "Game quit prematurely.";
+    String set_up = "C4 13 F1 C2 13 F2 C2 12 F2 C1 13 F3 C1 12 F3 C1 11 F3 ";
+    String making_build = "C2 11 C1 C4 12 C1 C3 13 C1 C2 10 O1 ";
+    Appendable text = new StringBuilder();
+    Readable rd = new StringReader(set_up + making_build + "C1 10 F2 Q");
+    FreecellModel<Card> model = new MultiMoveSimpleFreecellModel();
+    SimpleFreecellController controller = new SimpleFreecellController(model, rd, text);
+    controller.playGame(orderedDeck, 4, 4, false);
+    assertEquals(expected, text.toString().substring(2789));
+  }
+
+  @Test
+  public void completeGameWithInvalidInputs() {
+    initOrderedDeck();
+    halfwin();
+    Appendable text = new StringBuilder();
+    Readable rd = new StringReader("ufehuwfhuhwu " + winSequenece);
+    FreecellModel<Card> model = new SimpleFreecellModel();
+    SimpleFreecellController controller = new SimpleFreecellController(model, rd, text);
+    assertEquals(false, model.isGameOver());
+    controller.playGame(orderedDeck, 4, 1, false);
+    assertEquals(true, model.isGameOver());
   }
 }
