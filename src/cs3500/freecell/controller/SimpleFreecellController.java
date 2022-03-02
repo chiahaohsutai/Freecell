@@ -50,7 +50,6 @@ public class SimpleFreecellController implements FreecellController<Card> {
     if (!callStartOnModel(deck, numCascades, numOpens, shuffle)) {
       return;
     }
-
     activeGame = true;
     Scanner scan = new Scanner(rd);
     while (activeGame) {
@@ -70,7 +69,7 @@ public class SimpleFreecellController implements FreecellController<Card> {
       try {
         view.renderBoard();
       } catch (IOException e) {
-        throw new IllegalStateException("Error while rendering message.");
+        throw new IllegalStateException("Error while rendering board.");
       }
 
       Map<InputType, String> validateInputs = getInput(scan);
@@ -96,11 +95,7 @@ public class SimpleFreecellController implements FreecellController<Card> {
       try {
         model.move(source, sourcePileIdx, cardIndex, destination, destPileIdx);
       } catch (IllegalArgumentException | IndexOutOfBoundsException e) {
-        try {
-          view.renderMessage("Invalid move !\n");
-        } catch (IOException ex) {
-          throw new IllegalStateException("Error while rendering message.");
-        }
+        renderMsgTryCatch("Invalid move !\n");
       }
     }
   }
@@ -125,12 +120,8 @@ public class SimpleFreecellController implements FreecellController<Card> {
     try {
       model.startGame(deck, numCascades, numOpens, shuffle);
       return true;
-    } catch (Exception e) {
-      try {
-        view.renderMessage("Could not start game.");
-      } catch (IOException ex) {
-        throw new IllegalStateException("Error while rendering message.");
-      }
+    } catch (IllegalArgumentException | IllegalStateException e) {
+      renderMsgTryCatch("Could not start game.");
       return false;
     }
   }
@@ -175,11 +166,7 @@ public class SimpleFreecellController implements FreecellController<Card> {
       String userResponse = inputFunctions.get(type).apply(scan);
       if (checkForQuit(userResponse)) {
         activeGame = false;
-        try {
-          view.renderMessage("Game quit prematurely.");
-        } catch (IOException ex) {
-          throw new IllegalStateException("Error while rendering message.");
-        }
+        renderMsgTryCatch("Game quit prematurely.");
         return null;
       }
       inputs.put(type, userResponse); // Put valid input in map (validation happens in helpers).
@@ -232,11 +219,7 @@ public class SimpleFreecellController implements FreecellController<Card> {
     }
     // repeat the method if input is inappropriate.
     else {
-      try {
-        view.renderMessage("Invalid pile type !\n");
-      } catch (IOException e) {
-        throw new IllegalStateException("Error while rendering message.");
-      }
+      renderMsgTryCatch("Invalid pile type !\n");
       try {
         input = scan.next();
       } catch (NoSuchElementException e) {
@@ -335,11 +318,7 @@ public class SimpleFreecellController implements FreecellController<Card> {
       Integer.parseInt(index);
       return index;
     } catch (NumberFormatException e) {
-      try {
-        view.renderMessage("Index must be an integer !\n");
-      } catch (IOException ex) {
-        throw new IllegalStateException("Error while rendering message.");
-      }
+      renderMsgTryCatch("Index must be an integer !\n");
       try {
         index = scan.next();
       } catch (NoSuchElementException exc) {
@@ -350,6 +329,19 @@ public class SimpleFreecellController implements FreecellController<Card> {
       }
     }
     return validateIndex(scan, index);
+  }
+
+  /**
+   * Renders a message into the game.
+   *
+   * @param msg message being rendered into the game.
+   */
+  private void renderMsgTryCatch(String msg) {
+    try {
+      view.renderMessage(msg);
+    } catch (IOException ex) {
+      throw new IllegalStateException("Error while rendering message.");
+    }
   }
 }
 

@@ -717,13 +717,26 @@ public class FreecellControllerTest {
     assertEquals(false, text.toString().contains("Invalid pile type !\n"));
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void voidInvalidBuild() {
+    initOrderedDeck();
+    String expected = "F1:\n" + "F2:\n" + "F3:\n" + "F4:\n" + "O1:\n" + "O2:\n" + "O3:\n" +
+            "O4:\n" + "C1: A♦, 5♦, 9♦, K♦, 4♣, 8♣, Q♣, 3♠, 7♠, J♠, 2♥, 6♥, 10♥\n" +
+            "C2: 2♦, 6♦, 10♦, A♣, 5♣, 9♣, K♣, 4♠, 8♠, Q♠, 3♥, 7♥, J♥\n" +
+            "C3: 3♦, 7♦, J♦, 2♣, 6♣, 10♣, A♠, 5♠, 9♠, K♠, 4♥, 8♥, Q♥\n" +
+            "C4: 4♦, 8♦, Q♦, 3♣, 7♣, J♣, 2♠, 6♠, 10♠, A♥, 5♥, 9♥, K♥\n" +
+            "Invalid move !\n" + "F1:\n" + "F2:\n" + "F3:\n" + "F4:\n" + "O1:\n" + "O2:\n" +
+            "O3:\n" + "O4:\n" + "C1: A♦, 5♦, 9♦, K♦, 4♣, 8♣, Q♣, 3♠, 7♠, J♠, 2♥, 6♥, 10♥\n" +
+            "C2: 2♦, 6♦, 10♦, A♣, 5♣, 9♣, K♣, 4♠, 8♠, Q♠, 3♥, 7♥, J♥\n" +
+            "C3: 3♦, 7♦, J♦, 2♣, 6♣, 10♣, A♠, 5♠, 9♠, K♠, 4♥, 8♥, Q♥\n" +
+            "C4: 4♦, 8♦, Q♦, 3♣, 7♣, J♣, 2♠, 6♠, 10♠, A♥, 5♥, 9♥, K♥\n" +
+            "Game quit prematurely.";
     Appendable text = new StringBuilder();
-    Readable rd = new StringReader("C1 8 F1");
+    Readable rd = new StringReader("C1 8 F1 Q");
     FreecellModel<Card> model = new MultiMoveSimpleFreecellModel();
     SimpleFreecellController controller = new SimpleFreecellController(model, rd, text);
     controller.playGame(model.getDeck(), 4, 4, false);
+    assertEquals(expected, text.toString());
   }
 
   @Test
