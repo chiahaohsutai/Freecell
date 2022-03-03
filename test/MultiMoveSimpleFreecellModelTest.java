@@ -12,6 +12,7 @@ import cs3500.freecell.model.Suits;
 import cs3500.freecell.model.multimove.MultiMoveSimpleFreecellModel;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 
 /**
  * To test the functionality of the Multi Move Freecell game.
@@ -350,5 +351,264 @@ public class MultiMoveSimpleFreecellModelTest {
     model.move(PileType.OPEN, 0, 0, PileType.FOUNDATION, 0);
     assertEquals(0, model.getNumCardsInOpenPile(0));
     assertEquals(2, model.getNumCardsInFoundationPile(0));
+  }
+
+  @Test
+  public void restartGame() {
+    init();
+    assertEquals(0, this.model.getNumCardsInFoundationPile(0));
+    assertEquals(0, this.model.getNumCardsInFoundationPile(1));
+    assertEquals(0, this.model.getNumCardsInFoundationPile(2));
+    assertEquals(0, this.model.getNumCardsInFoundationPile(3));
+    assertEquals(13, this.model.getNumCardsInCascadePile(0));
+    assertEquals(13, this.model.getNumCardsInCascadePile(1));
+    assertEquals(13, this.model.getNumCardsInCascadePile(2));
+    assertEquals(13, this.model.getNumCardsInCascadePile(3));
+    assertEquals(0, this.model.getNumCardsInOpenPile(0));
+    this.model.move(PileType.CASCADE, 0, 12, PileType.FOUNDATION, 0);
+    this.model.move(PileType.CASCADE, 1, 12, PileType.FOUNDATION, 1);
+    this.model.move(PileType.CASCADE, 2, 12, PileType.FOUNDATION, 2);
+    this.model.move(PileType.CASCADE, 3, 12, PileType.FOUNDATION, 3);
+    this.model.move(PileType.CASCADE, 3, 11, PileType.OPEN, 0);
+    assertEquals(1, this.model.getNumCardsInFoundationPile(0));
+    assertEquals(1, this.model.getNumCardsInFoundationPile(1));
+    assertEquals(1, this.model.getNumCardsInFoundationPile(2));
+    assertEquals(1, this.model.getNumCardsInFoundationPile(3));
+    assertEquals(12, this.model.getNumCardsInCascadePile(0));
+    assertEquals(12, this.model.getNumCardsInCascadePile(1));
+    assertEquals(12, this.model.getNumCardsInCascadePile(2));
+    assertEquals(11, this.model.getNumCardsInCascadePile(3));
+    assertEquals(1, this.model.getNumCardsInOpenPile(0));
+    this.model.startGame(this.model.getDeck(),4,1, false);
+    assertEquals(0, this.model.getNumCardsInFoundationPile(0));
+    assertEquals(0, this.model.getNumCardsInFoundationPile(1));
+    assertEquals(0, this.model.getNumCardsInFoundationPile(2));
+    assertEquals(0, this.model.getNumCardsInFoundationPile(3));
+    assertEquals(13, this.model.getNumCardsInCascadePile(0));
+    assertEquals(13, this.model.getNumCardsInCascadePile(1));
+    assertEquals(13, this.model.getNumCardsInCascadePile(2));
+    assertEquals(13, this.model.getNumCardsInCascadePile(3));
+    assertEquals(0, this.model.getNumCardsInOpenPile(0));
+  }
+
+  @Test(expected = IllegalStateException.class)
+  public void getNumCardsAtFoundationWhileInActiveGame() {
+    model = new MultiMoveSimpleFreecellModel();
+    this.model.getNumCardsInFoundationPile(0);
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void getNumCardsAtFoundationInvalidIdxLowerLimit() {
+    init();
+    this.model.getNumCardsInFoundationPile(-1);
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void getNumCardsAtFoundationInvalidIdxUpperLimit() {
+    init();
+    this.model.getNumCardsInFoundationPile(7);
+  }
+
+  @Test
+  public void getNumCardsInFoundationPileTest() {
+    init();
+    this.model.move(PileType.CASCADE, 3, 12, PileType.FOUNDATION, 0);
+    assertEquals(1, this.model.getNumCardsInFoundationPile(0));
+  }
+
+  @Test
+  public void getNumCascadePilesWhileInActiveGame() {
+    model = new MultiMoveSimpleFreecellModel();
+    assertEquals(-1, this.model.getNumCascadePiles());
+    init();
+    assertEquals(4, this.model.getNumCascadePiles());
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void getNumCardsAtCascadeInvalidIdxLowerLimit() {
+    init();
+    this.model.getNumCardsInCascadePile(-1);
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void getNumCardsAtCascadeInvalidIdxUpperLimit() {
+    init();
+    this.model.getNumCardsInCascadePile(5);
+  }
+
+  @Test(expected = IllegalStateException.class)
+  public void getNumCardsAtCascadePileWhileInactiveGame() {
+    model = new MultiMoveSimpleFreecellModel();
+    this.model.getNumCardsInCascadePile(0);
+  }
+
+  @Test
+  public void getNumCardsAtCascadePileTest() {
+    init();
+    assertEquals(13, this.model.getNumCardsInCascadePile(2));
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void getNumCardAtOpenPileInvalidIndex() {
+    init();
+    this.model.getNumCardsInOpenPile(1);
+  }
+
+  @Test(expected = IllegalStateException.class)
+  public void getNumCardsAtOpenPileWhileInactiveGame() {
+    model = new MultiMoveSimpleFreecellModel();
+    this.model.getNumCardsInOpenPile(0);
+  }
+
+  @Test
+  public void getNumCardsAtOpenPileTest() {
+    init();
+    assertEquals(0, this.model.getNumCardsInOpenPile(0));
+  }
+
+  @Test
+  public void getNumOpenPilesTest() {
+    model = new MultiMoveSimpleFreecellModel();
+    assertEquals(-1, this.model.getNumOpenPiles());
+    init();
+    assertEquals(1, this.model.getNumOpenPiles());
+  }
+
+  @Test(expected = IllegalStateException.class)
+  public void getFoundationCardAtInActiveGame() {
+    model = new MultiMoveSimpleFreecellModel();
+    this.model.getFoundationCardAt(0, 0);
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void getFoundationCardOutOfRange() {
+    init();
+    this.model.getFoundationCardAt(5, 1);
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void getFoundationCardOutOfRangeCard() {
+    init();
+    this.model.getFoundationCardAt(0, 1);
+  }
+
+  @Test
+  public void getFoundationCardTest() {
+    init();
+    this.model.move(PileType.CASCADE, 0, 12,
+            PileType.FOUNDATION, 0);
+    assertEquals("A♥", this.model.getFoundationCardAt(0, 0).toString());
+  }
+
+  @Test(expected = IllegalStateException.class)
+  public void getCascadeCardAtInActiveGame() {
+    model = new MultiMoveSimpleFreecellModel();
+    this.model.getCascadeCardAt(0, 0);
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void getCascadeCardOutOfRange() {
+    init();
+    this.model.getCascadeCardAt(-1, 0);
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void getCascadeCardOutOfRangeCard() {
+    init();
+    this.model.getCascadeCardAt(0, 27);
+  }
+
+  @Test
+  public void getCascadeCardTest() {
+    init();
+    assertEquals("K♥", this.model.getCascadeCardAt(0, 0).toString());
+  }
+
+  @Test(expected = IllegalStateException.class)
+  public void getOpenCardInActiveGame() {
+    model = new MultiMoveSimpleFreecellModel();
+    this.model.getOpenCardAt(0);
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void getOpenCardPileOutOfRange() {
+    init();
+    this.model.getOpenCardAt(2);
+  }
+
+  @Test
+  public void getOpenCardTest() {
+    init();
+    assertEquals(null, this.model.getOpenCardAt(0));
+    this.model.move(PileType.CASCADE, 0, 12, PileType.OPEN, 0);
+    assertEquals("A♥", this.model.getOpenCardAt(0).toString());
+  }
+
+  @Test
+  public void gameOverTest() {
+    model = new MultiMoveSimpleFreecellModel();
+    assertEquals(false, this.model.isGameOver());
+    this.init();
+    assertEquals(false, this.model.isGameOver());
+    for (int i = 0; i < 4; i++) {
+      for (int j = 12; j >= 0; j -= 1) {
+        this.model.move(PileType.CASCADE, i, j, PileType.FOUNDATION, i);
+      }
+    }
+    assertEquals(true, this.model.isGameOver());
+  }
+
+  @Test
+  public void getDeckTest() {
+    init();
+    assertEquals(52, model.getDeck().size());
+  }
+
+  @Test
+  public void shuffleDeckTest() {
+    init();
+    List<Card> cards = new ArrayList<>();
+    cards.addAll(orderedDeck);
+    model.startGame(orderedDeck, 4, 1, true);
+    assertNotEquals(cards, orderedDeck);
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void disallowInvalidOpenPileNumbers() {
+    init();
+    this.model.startGame(orderedDeck, 5, 0, false);
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void disallowInvalidCascadePileNumbers() {
+    init();
+    this.model.startGame(orderedDeck, 3, 2, false);
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void disallowRepeatsInDeck() {
+    init();
+    Card dupe = orderedDeck.get(1);
+    orderedDeck.remove(0);
+    orderedDeck.add(dupe);
+    this.model.startGame(orderedDeck, 4, 1, false);
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void disallowIncorrectSizeDeck() {
+    init();
+    orderedDeck.remove(0);
+    this.model.startGame(orderedDeck, 5, 2, false);
+  }
+
+  @Test
+  public void checkNumOfCascadePilesChanged() {
+    init();
+    this.model.startGame(this.model.getDeck(), 4, 1, false);
+    assertEquals(4, model.getNumCascadePiles());
+    assertEquals(1, model.getNumOpenPiles());
+    this.model.startGame(this.model.getDeck(), 5, 2, false);
+    assertEquals(5, this.model.getNumCascadePiles());
+    assertEquals(2, this.model.getNumOpenPiles());
   }
 }
