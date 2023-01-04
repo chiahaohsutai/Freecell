@@ -1,14 +1,11 @@
-# Freecell
+## FreeCell
 
-*What is this project about?* This project is a Freecell game implementation.
+### Project Description:
 
-Course Name : Object Oriented Design (OOD)
+This project is a FreeCell game implementation. The project focuses on providing all the functionalities needed for a FreeCell game to run. The code uses an object-oriented approach to define the set of rules and logic needed for a game of FreeCell. This project is equivalent to the Model in a MVC design pattern.
 
-### Summary of Technical Specifications:
+The project is able to successfully track all the piles in the game, track open piles, illegal moves and winning conditions. 
 
-The project uses a MVC pattern to define the framework of the code. If focuses mainly on the functionality of the model and likewise the use of 
-controller to transmit information between the view and model. The model is able to track each move perform by the user and it will detect whenever
-the user makes an invalid move. In terms of the view, there is no visual view available; however, there exists code that acts as a view for the 
-project. The view is able to print a string illustration of the state of the model. 
+Please find the code in the src folder.
 
-Please find the code in the src folder. 
+![image](https://user-images.githubusercontent.com/89400862/210668498-217d5ad2-8b50-4dfa-8ae1-ac1e19f076d4.png)
